@@ -12,47 +12,26 @@ import RegexBuilder
 public class Day1: DayProtocol {
     private let input: String
     private let rows: [String]
-    
+    private let leftList, rightList: [Int]
     public init() {
         input = FileHandler.getInputs(for: Bundle.module.resourcePath!, andDay: 1)
         rows = input.split(separator: "\n").map(String.init)
-    }
-    
-    func getLeftAndRightList() -> ([Int], [Int]) {
-        let splitRows = rows.map({ $0.split(separator: .whitespace) })
-            .map({ $0.map({ Int($0)! }) })
-            .flatMap { $0 }
-            .enumerated()
-        var leftList = [Int]()
-        var rightList = [Int]()
-        splitRows.forEach { index, value in
-            if index % 2 == 0 {
-                leftList.append(value)
-            } else {
-                rightList.append(value)
-            }
+        let splitRows = rows.map { row in
+            row.split(separator: .whitespace).map { Int($0)! }
         }
-        return (leftList, rightList)
+        leftList = splitRows.map({ $0[0] })
+        rightList = splitRows.map({ $0[1] })
     }
 
     public func partOne() -> String {
-        let (leftList, rightList) = getLeftAndRightList()
-        var differences = [Int]()
-        zip(leftList.sorted(), rightList.sorted()).forEach { left, right in
-            differences.append(abs(left - right))
-        }
-        
-        return differences.reduce(0, +).description
+        zip(leftList.sorted(), rightList.sorted()).reduce(0, { total, pair in
+            total + abs(pair.0 - pair.1)
+        }).description
     }
         
     public func partTwo() -> String {
-        let (leftList, rightList) = getLeftAndRightList()
-        var similarityScores = [Int : Int]()
-        leftList.forEach { value in
-            let occurances = rightList.filter { $0 == value }.count
-            similarityScores[value] = occurances * value
-        }
-        
-        return similarityScores.values.reduce(0, +).description
+        leftList.reduce(into: [Int : Int]()) { total, value in
+            total[value] = rightList.count { $0 == value } * value
+        }.values.reduce(0, +).description
     }
 }
