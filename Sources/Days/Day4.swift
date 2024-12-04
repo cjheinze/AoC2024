@@ -36,26 +36,41 @@ public class Day4: DayProtocol {
     
     public func partTwo() -> String {
         
-        let result = findXPattern(Grid(grid: self.grid))
+        let result = findXPattern(Grid(grid: self.grid), word: "MAS")
         
         return (result.count(where: { $0 })).description
     }
     
-    fileprivate func findXPattern(_ wordSearch: Grid<Character>) -> [Bool] {
-
+    fileprivate func findXPattern(_ wordSearch: Grid<Character>, word: String) -> [Bool] {
+        guard word.count == 3 else {
+            fatalError("Word must be 3 characters long")
+        }
+        
+        let firstChar = word.first!
+        let lastChar = word.last!
+        let middleChar = word[word.index(after: word.startIndex)]
+        
         return wordSearch.allPositions.map { pos in
-            var foundX = false
+
             if let char = wordSearch.get(pos),
                let topLeft = wordSearch.get(Grid.Position(x: pos.x - 1, y: pos.y - 1)),
                let topRight = wordSearch.get(Grid.Position(x: pos.x + 1, y: pos.y - 1)),
                let bottomLeft = wordSearch.get(Grid.Position(x: pos.x - 1, y: pos.y + 1)),
                let bottomRight = wordSearch.get(Grid.Position(x: pos.x + 1, y: pos.y + 1)) {
-                guard char == "A" else {
+                guard char == middleChar else {
                     return false
                 }
-                return ((topLeft == "M" && bottomRight == "S") || (topLeft == "S" && bottomRight == "M")) &&
-                ((topRight == "M" && bottomLeft == "S") || (topRight == "S" && bottomLeft == "M"))
-                    
+                
+                return switch ((topLeft, bottomRight), (topRight, bottomLeft)) {
+                case ((firstChar, lastChar), (firstChar, lastChar)),
+                    ((lastChar, firstChar), (lastChar, firstChar)),
+                    ((firstChar, lastChar), (lastChar, firstChar)),
+                    ((lastChar, firstChar), (firstChar, lastChar)):
+                    true
+                default:
+                    false
+                }
+
             }
             return false
         }
