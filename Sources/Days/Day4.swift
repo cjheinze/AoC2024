@@ -3,54 +3,78 @@ import Helper
 import RegexBuilder
 import Algorithms
 
-public class Day3: DayProtocol {
+public class Day4: DayProtocol {
     private let input: String
-    private let rows: [String]
-    
+    private let grid: [[Character]]
     public init() {
-        input = FileHandler.getInputs(for: Bundle.module.resourcePath!, andDay: 3).replacingOccurrences(of: "\n", with: "")
-        rows = input.split(separator: "\n")
+        input = FileHandler.getInputs(for: Bundle.module.resourcePath!, andDay: 4)
+        grid = input.split(separator: "\n")
             .map(String.init)
+            .map(Array.init)
     }
-    
-    fileprivate func extractMultiplicationPairs(row: String) -> [(Int, Int)] {
-        let regex = #/mul\((\d+),(\d+)\)/#
-        return row
-            .matches(of: regex)
-            .map { match in
-                (Int(match.1)!, Int(match.2)!)
-            }
-    }
-    
     
     public func partOne() -> String {
-        return extractMultiplicationPairs(row: input)
-            .map { pair in
-                pair.0 * pair.1
-            }
-            .reduce(0, +).description
+        let wordToFindInGrid = "XMAS"
+        
+        let directionsToCheck: [Grid<Character>.Position] = [
+            .init(x: 1, y: 0),
+            .init(x: 1, y: 1),
+            .init(x: 1, y: -1),
+            .init(x: -1, y: 1),
+            .init(x: -1, y: 0),
+            .init(x: -1, y: -1),
+            .init(x: 0, y: -1),
+            .init(x: 0, y: 1),
+        ]
+        
+        let wordSearch = Grid(grid: self.grid)
+        
+        let result = doTheSearch(wordSearch, directionsToCheck, wordToFindInGrid)
+        
+        return result.flatMap { $0 }.count(where: { $0 }).description
     }
     
     public func partTwo() -> String {
-        let pattern = #/do\(\)|don't\(\)|mul\((\d+),(\d+)\)/#
-        let matches = input.matches(of: pattern)
         
-        var isEnabled = true
-        var total = 0
+        let result = findXPattern(Grid(grid: self.grid))
         
-        for match in matches {
-            
-            switch match.output.0 {
-            case "do()":
-                isEnabled = true
-            case "don't()":
-                isEnabled = false
-            default:
-                if isEnabled, let x = match.output.1, let y = match.output.2 {
-                    total += Int(x)! * Int(y)!
+        return (result.count(where: { $0 })).description
+    }
+    
+    fileprivate func findXPattern(_ wordSearch: Grid<Character>) -> [Bool] {
+
+        return wordSearch.allPositions.map { pos in
+            var foundX = false
+            if let char = wordSearch.get(pos),
+               let topLeft = wordSearch.get(Grid.Position(x: pos.x - 1, y: pos.y - 1)),
+               let topRight = wordSearch.get(Grid.Position(x: pos.x + 1, y: pos.y - 1)),
+               let bottomLeft = wordSearch.get(Grid.Position(x: pos.x - 1, y: pos.y + 1)),
+               let bottomRight = wordSearch.get(Grid.Position(x: pos.x + 1, y: pos.y + 1)) {
+                guard char == "A" else {
+                    return false
                 }
+                return ((topLeft == "M" && bottomRight == "S") || (topLeft == "S" && bottomRight == "M")) &&
+                ((topRight == "M" && bottomLeft == "S") || (topRight == "S" && bottomLeft == "M"))
+                    
+            }
+            return false
+        }
+    }
+    
+    fileprivate func doTheSearch(_ wordSearch: Grid<Character>, _ directionsToCheck: [Grid<Character>.Position], _ wordToFindInGrid: String) -> [[Bool]] {
+        return wordSearch.allPositions.map { pos in
+            directionsToCheck.map { direction in
+                var currentPos = pos
+                var foundWord = ""
+                while let char = wordSearch.get(currentPos) {
+                    foundWord.append(char)
+                    if foundWord == wordToFindInGrid {
+                        return true
+                    }
+                    currentPos = Grid.Position(x: currentPos.x + direction.x, y: currentPos.y + direction.y)
+                }
+                return false
             }
         }
-        return "\(total)"
-    }
+    }    
 }

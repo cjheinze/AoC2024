@@ -61,3 +61,40 @@ public func lcm(_ vector : [Int]) -> Int {
 public func +<T: Numeric> (x: (T, T), y: (T, T)) -> (T, T) {
     (x.0 + y.0, x.1 + y.1)
 }
+
+public struct Grid<Content> {
+    public struct Position {
+        public let x: Int
+        public let y: Int
+        
+        public init(x: Int, y: Int) {
+            self.x = x
+            self.y = y
+        }
+    }
+    
+    private let _grid: [[Content]]
+    
+    public init(grid: [[Content]]) {
+        _grid = grid
+    }
+    
+    public var allPositions: [Position] {
+        return (0..<_grid.count).flatMap { y in
+            (0..<_grid[y].count).map { x in
+                Position(x: x, y: y)
+            }
+        }
+    }
+    
+    public func get(_ position: Position) -> Content? {
+        guard isValid(position) else {
+            return nil
+        }
+        return _grid[position.y][position.x]
+    }
+    
+    public func isValid(_ position: Position) -> Bool {
+        return position.x >= 0 && position.x < _grid[0].count && position.y >= 0 && position.y < _grid.count
+    }
+}
