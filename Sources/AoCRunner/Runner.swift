@@ -13,7 +13,7 @@ struct Runner {
     
     static func main() async {
 
-        let day: DayProtocol = Day4()
+        let day: DayProtocol = Day5()
         
         let startPartOne = Date()
         print("Start part one")
