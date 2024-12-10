@@ -8,12 +8,12 @@ public class Day6: DayProtocol {
     
     private let map: Grid<MapSymbols>
     
-    private let startPosition: Grid<MapSymbols>.Position
+    private let startPosition: Position
     
-    private let up = Grid<MapSymbols>.Position(x: 0, y: -1)
-    private let down = Grid<MapSymbols>.Position(x: 0, y: 1)
-    private let left = Grid<MapSymbols>.Position(x: -1, y: 0)
-    private let right = Grid<MapSymbols>.Position(x: 1, y: 0)
+    private let up = Position(x: 0, y: -1)
+    private let down = Position(x: 0, y: 1)
+    private let left = Position(x: -1, y: 0)
+    private let right = Position(x: 1, y: 0)
 
     public init() {
         input = FileHandler.getInputs(for: Bundle.module.resourcePath!, andDay: 6)
@@ -30,7 +30,7 @@ public class Day6: DayProtocol {
         var currentDirection = up
         var currentPosition = startPosition
         var nextPosition = startPosition.adding(currentDirection)
-        var visitedPositions: Set<Grid<MapSymbols>.Position> = [startPosition]
+        var visitedPositions: Set<Position> = [startPosition]
         while map.isValid(nextPosition) {
             let nextSymbol = map.get(nextPosition)
             switch nextSymbol {
@@ -60,7 +60,7 @@ public class Day6: DayProtocol {
     func findLoop(map: Grid<MapSymbols>) -> Bool {
         var currentDirection = up
         var currentPosition = startPosition
-        var visitedPositionsAndDirections: [Grid<MapSymbols>.Position : Set<Grid<MapSymbols>.Position>] = [:]
+        var visitedPositionsAndDirections: [Position : Set<Position>] = [:]
 
         while map.isValid(currentPosition.adding(currentDirection)) {
             if visitedPositionsAndDirections[currentPosition]?.contains(currentDirection) == true {
@@ -79,7 +79,7 @@ public class Day6: DayProtocol {
         return false
     }
     
-    func getNextDirection(_ direction: Grid<MapSymbols>.Position) -> Grid<MapSymbols>.Position {
+    func getNextDirection(_ direction: Position) -> Position {
         return switch direction {
         case up: right
         case right: down

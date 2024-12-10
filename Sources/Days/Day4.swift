@@ -16,7 +16,7 @@ public class Day4: DayProtocol {
     public func partOne() -> String {
         let wordToFindInGrid = "XMAS"
         
-        let directionsToCheck: [Grid<Character>.Position] = [
+        let directionsToCheck: [Position] = [
             .init(x: 1, y: 0),
             .init(x: 1, y: 1),
             .init(x: 1, y: -1),
@@ -53,10 +53,10 @@ public class Day4: DayProtocol {
         return wordSearch.allPositions.map { pos in
 
             if let char = wordSearch.get(pos),
-               let topLeft = wordSearch.get(Grid.Position(x: pos.x - 1, y: pos.y - 1)),
-               let topRight = wordSearch.get(Grid.Position(x: pos.x + 1, y: pos.y - 1)),
-               let bottomLeft = wordSearch.get(Grid.Position(x: pos.x - 1, y: pos.y + 1)),
-               let bottomRight = wordSearch.get(Grid.Position(x: pos.x + 1, y: pos.y + 1)) {
+               let topLeft = wordSearch.get(Position(x: pos.x - 1, y: pos.y - 1)),
+               let topRight = wordSearch.get(Position(x: pos.x + 1, y: pos.y - 1)),
+               let bottomLeft = wordSearch.get(Position(x: pos.x - 1, y: pos.y + 1)),
+               let bottomRight = wordSearch.get(Position(x: pos.x + 1, y: pos.y + 1)) {
                 guard char == middleChar else {
                     return false
                 }
@@ -76,7 +76,7 @@ public class Day4: DayProtocol {
         }
     }
     
-    fileprivate func doTheSearch(_ wordSearch: Grid<Character>, _ directionsToCheck: [Grid<Character>.Position], _ wordToFindInGrid: String) -> [[Bool]] {
+    fileprivate func doTheSearch(_ wordSearch: Grid<Character>, _ directionsToCheck: [Position], _ wordToFindInGrid: String) -> [[Bool]] {
         return wordSearch.allPositions.map { pos in
             directionsToCheck.map { direction in
                 var currentPos = pos
@@ -86,7 +86,7 @@ public class Day4: DayProtocol {
                     if foundWord == wordToFindInGrid {
                         return true
                     }
-                    currentPos = Grid.Position(x: currentPos.x + direction.x, y: currentPos.y + direction.y)
+                    currentPos = Position(x: currentPos.x + direction.x, y: currentPos.y + direction.y)
                 }
                 return false
             }

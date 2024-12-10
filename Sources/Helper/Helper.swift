@@ -62,25 +62,38 @@ public func +<T: Numeric> (x: (T, T), y: (T, T)) -> (T, T) {
     (x.0 + y.0, x.1 + y.1)
 }
 
-public struct Grid<Content>: Hashable, Equatable, Sendable where Content: Hashable & Equatable & Sendable {
-    public struct Position: Equatable, Hashable, Sendable {
-        public let x: Int
-        public let y: Int
-        
-        public init(x: Int, y: Int) {
-            self.x = x
-            self.y = y
-        }
-        
-        public func adding(_ other: Position) -> Position {
-            return Position(x: x + other.x, y: y + other.y)
-        }
+public struct Position: Equatable, Hashable, Sendable {
+    public let x: Int
+    public let y: Int
+    
+    public init(x: Int, y: Int) {
+        self.x = x
+        self.y = y
     }
     
+    public func adding(_ other: Position) -> Position {
+        return Position(x: x + other.x, y: y + other.y)
+    }
+    
+    public func subtracting(_ other: Position) -> Position {
+        return Position(x: x - other.x, y: y - other.y)
+    }
+    
+    public func distanceVector(to other: Position) -> Position {
+        return Position(x: other.x - x, y: other.y - y)
+    }
+}
+
+public struct Grid<Content>: Hashable, Equatable, Sendable where Content: Hashable & Equatable & Sendable {
     private var _grid: [[Content]]
     
     public init(grid: [[Content]]) {
+
         _grid = grid
+    }
+    
+    public var size: (width: Int, height: Int) {
+        return (_grid[0].count, _grid.count)
     }
     
     public var allPositions: [Position] {
@@ -96,6 +109,35 @@ public struct Grid<Content>: Hashable, Equatable, Sendable where Content: Hashab
             return nil
         }
         return _grid[position.y][position.x]
+    }
+    
+    public subscript(position: Position) -> Content? {
+        get {
+            get(position)
+        }
+    }
+    
+    public func getAllPositionsInLineWith(_ position: Position, _ other: Position) -> [Position] {
+        let distance = position.distanceVector(to: other)
+        let gcd = gcd(distance.x, distance.y)
+        let step = Position(x: distance.x / gcd, y: distance.y / gcd)
+        var currentPosition = position
+        var positions = [currentPosition]
+        while currentPosition != other {
+            currentPosition = currentPosition.adding(step)
+            positions.append(currentPosition)
+        }
+        return positions
+    }
+    
+    public static func gridWithRepeatingContent(width: Int, height: Int, content: Content) -> Grid {
+        return Grid(grid: Array(repeating: Array(repeating: content, count: width), count: height))
+    }
+    
+    public func print() {
+        for row in _grid {
+            Swift.print(row.map { "\($0)" }.joined())
+        }
     }
     
     public func copy(changing position: Position, to content: Content) -> Grid {
