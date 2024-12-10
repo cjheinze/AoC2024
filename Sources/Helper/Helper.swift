@@ -62,8 +62,8 @@ public func +<T: Numeric> (x: (T, T), y: (T, T)) -> (T, T) {
     (x.0 + y.0, x.1 + y.1)
 }
 
-public struct Grid<Content> {
-    public struct Position {
+public struct Grid<Content>: Hashable, Equatable, Sendable where Content: Hashable & Equatable & Sendable {
+    public struct Position: Equatable, Hashable, Sendable {
         public let x: Int
         public let y: Int
         
@@ -71,9 +71,13 @@ public struct Grid<Content> {
             self.x = x
             self.y = y
         }
+        
+        public func adding(_ other: Position) -> Position {
+            return Position(x: x + other.x, y: y + other.y)
+        }
     }
     
-    private let _grid: [[Content]]
+    private var _grid: [[Content]]
     
     public init(grid: [[Content]]) {
         _grid = grid
@@ -92,6 +96,19 @@ public struct Grid<Content> {
             return nil
         }
         return _grid[position.y][position.x]
+    }
+    
+    public func copy(changing position: Position, to content: Content) -> Grid {
+        var newGrid = _grid
+        newGrid[position.y][position.x] = content
+        return Grid(grid: newGrid)
+    }
+    
+    public mutating func set(_ position: Position, to content: Content) {
+        guard isValid(position) else {
+            return
+        }
+        _grid[position.y][position.x] = content
     }
     
     public func isValid(_ position: Position) -> Bool {
